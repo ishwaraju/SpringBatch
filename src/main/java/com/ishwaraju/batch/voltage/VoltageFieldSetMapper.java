@@ -1,4 +1,4 @@
-package com.ishwaraju.config;
+package com.ishwaraju.batch.voltage;
 
 import org.springframework.batch.item.file.mapping.FieldSetMapper;
 import org.springframework.batch.item.file.transform.FieldSet;
@@ -9,13 +9,12 @@ import com.ishwaraju.entity.Voltage;
 @Component
 public class VoltageFieldSetMapper implements FieldSetMapper<Voltage> {
 
-    @Override
-    public Voltage mapFieldSet(FieldSet fieldSet) {
-        final Voltage voltage = new Voltage();
+	@Override
+	public Voltage mapFieldSet(FieldSet fieldSet) {
+		final Voltage voltage = new Voltage();
+		voltage.setVolt(fieldSet.readBigDecimal("volt"));
+		voltage.setTime(fieldSet.readDouble("time"));
+		return voltage;
 
-        voltage.setVolt(fieldSet.readBigDecimal("volt"));
-        voltage.setTime(fieldSet.readDouble("time"));
-        return voltage;
-
-    }
+	}
 }

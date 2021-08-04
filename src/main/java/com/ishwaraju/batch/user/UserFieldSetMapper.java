@@ -1,4 +1,4 @@
-package com.ishwaraju.config;
+package com.ishwaraju.batch.user;
 
 import org.springframework.batch.item.file.mapping.FieldSetMapper;
 import org.springframework.batch.item.file.transform.FieldSet;
@@ -15,7 +15,6 @@ public class UserFieldSetMapper implements FieldSetMapper<User> {
 		final User user = new User();
 		user.setName(fieldSet.readString("name"));
 		user.setSalary(fieldSet.readInt("salary"));
-		// id name dept salary
 		return user;
 	}
 

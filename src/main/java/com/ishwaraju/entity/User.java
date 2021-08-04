@@ -17,9 +17,7 @@ public class User {
 	public Integer salary;
 
 	public User() {
-	}
-
-	
+	}	
 
 	public User(Integer id, String name, Integer salary) {
 	
@@ -27,8 +25,6 @@ public class User {
 		this.name = name;
 		this.salary = salary;
 	}
-
-
 
 	public Integer getId() {
 		return id;

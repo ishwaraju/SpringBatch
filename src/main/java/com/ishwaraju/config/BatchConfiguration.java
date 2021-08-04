@@ -1,16 +1,11 @@
 package com.ishwaraju.config;
 
-import javax.sql.DataSource;
-
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
-import org.springframework.batch.item.database.JdbcBatchItemWriter;
-import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
@@ -22,6 +17,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
+import com.ishwaraju.batch.user.UserFieldSetMapper;
+import com.ishwaraju.batch.user.UserProcessor;
+import com.ishwaraju.batch.user.UserWriter;
+import com.ishwaraju.batch.voltage.VoltageFieldSetMapper;
+import com.ishwaraju.batch.voltage.VoltageProcessor;
+import com.ishwaraju.batch.voltage.VoltageWriter;
 import com.ishwaraju.entity.User;
 import com.ishwaraju.entity.Voltage;
 
@@ -50,7 +51,7 @@ public class BatchConfiguration {
 	public FlatFileItemReader<User> readerUser() {
 		System.out.println("****************************************");
 		return new FlatFileItemReaderBuilder<User>().name("userItemReader").resource(new ClassPathResource("user.csv"))
-				.delimited().names(new String[] { "name","salary" }).lineMapper(lineMapperUser())
+				.delimited().names(new String[] { "name", "salary" }).lineMapper(lineMapperUser())
 				.fieldSetMapper(new BeanWrapperFieldSetMapper<User>() {
 					{
 						setTargetType(User.class);
@@ -64,7 +65,7 @@ public class BatchConfiguration {
 		final DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
 		lineTokenizer.setDelimiter(",");
 		lineTokenizer.setStrict(false);
-		lineTokenizer.setNames(new String[] { "name","salary" });
+		lineTokenizer.setNames(new String[] { "name", "salary" });
 		final UserFieldSetMapper fieldSetMapper = new UserFieldSetMapper();
 		defaultLineMapper.setLineTokenizer(lineTokenizer);
 		defaultLineMapper.setFieldSetMapper(fieldSetMapper);
@@ -86,30 +87,6 @@ public class BatchConfiguration {
 
 		return defaultLineMapper;
 	}
-	
-	@Bean
-	public UserProcessor userProcessor() {
-		return new UserProcessor();
-	}
-
-	@Bean
-	public VoltageProcessor processor() {
-		return new VoltageProcessor();
-	}
-	
-	@Bean
-	public JdbcBatchItemWriter<Voltage> writer(final DataSource dataSource) {
-		return new JdbcBatchItemWriterBuilder<Voltage>()
-				.itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
-				.sql("INSERT INTO voltage (volt, time) VALUES (:volt, :time)").dataSource(dataSource).build();
-	}
-	
-	@Bean
-	public JdbcBatchItemWriter<User> writerUser(final DataSource dataSource) {
-		return new JdbcBatchItemWriterBuilder<User>()
-				.itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
-				.sql("INSERT INTO user (name, salary) VALUES (:name,:salary)").dataSource(dataSource).build();
-	}
 
 	@Bean
 	public Job importVoltageJob(NotificationListener listener, Step step1) {
@@ -117,23 +94,23 @@ public class BatchConfiguration {
 		return jobBuilderFactory.get("importVoltageJob").incrementer(new RunIdIncrementer()).listener(listener)
 				.flow(step1).end().build();
 	}
-	
+
 	@Bean
 	public Job importUserJob(NotificationListener listener, Step step2) {
 		System.out.println(step2);
-		return jobBuilderFactory.get("importUserJob").incrementer(new RunIdIncrementer()).listener(listener)
-				.flow(step2).end().build();
+		return jobBuilderFactory.get("importUserJob").incrementer(new RunIdIncrementer()).listener(listener).flow(step2)
+				.end().build();
 	}
 
 	@Bean
-	public Step step1(JdbcBatchItemWriter<Voltage> writer) {
-		return stepBuilderFactory.get("step1").<Voltage, Voltage>chunk(10).reader(readerVoltage()).processor(processor())
+	public Step step1(VoltageWriter writer, VoltageProcessor processor) {
+		return stepBuilderFactory.get("step1").<Voltage, Voltage>chunk(10).reader(readerVoltage()).processor(processor)
 				.writer(writer).build();
 	}
-	
+
 	@Bean
-	public Step step2(JdbcBatchItemWriter<User> writer) {
-		return stepBuilderFactory.get("step1").<User, User>chunk(10).reader(readerUser()).processor(userProcessor())
+	public Step step2(UserWriter writer, UserProcessor processor) {
+		return stepBuilderFactory.get("step1").<User, User>chunk(10).reader(readerUser()).processor(processor)
 				.writer(writer).build();
 	}
 }
