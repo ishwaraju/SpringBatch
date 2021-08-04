@@ -1,0 +1,13 @@
+com\ishwaraju\entity\User.class
+com\ishwaraju\config\VoltageFieldSetMapper.class
+com\ishwaraju\config\NotificationListener.class
+com\ishwaraju\config\BatchConfiguration.class
+com\ishwaraju\repository\UserRepository.class
+com\ishwaraju\VoltBatchApplication.class
+com\ishwaraju\config\UserFieldSetMapper.class
+com\ishwaraju\entity\Voltage.class
+com\ishwaraju\config\UserProcessor.class
+com\ishwaraju\config\BatchConfiguration$2.class
+com\ishwaraju\repository\IVoltageRepository.class
+com\ishwaraju\config\VoltageProcessor.class
+com\ishwaraju\config\BatchConfiguration$1.class
